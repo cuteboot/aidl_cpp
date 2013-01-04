@@ -35,6 +35,8 @@ static TYPEMAP typemap[] = {
     {"CharSequence", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
     {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&",
         "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
+    {"WorkSource", "WorkSource", "%s = data.readWorkSource();\n", "data.writeWorkSource(%s);\n"},
+    {"float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
     {0, 0, 0, 0}};
 
     TYPEMAP *p = typemap;
@@ -216,8 +218,8 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
             }
             fprintf(outputfd, ")\n{\n    Parcel data, reply;\n");
             if (strcmp(method->type.type.data, "void")) {
-printf("[%s:%d]\n", __FUNCTION__, __LINE__);
-exit(1);
+printf("[%s:%d] result type not void\n", __FUNCTION__, __LINE__);
+//exit(1);
             }
             fprintf(outputfd, "    data.writeInterfaceToken(%s::getInterfaceDescriptor());\n\n", this_proxy_interface);
             arg = method->args;
