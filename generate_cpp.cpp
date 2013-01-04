@@ -174,13 +174,26 @@ static void generate_client_h(FILE *outputfd, interface_item_type* aitem)
         }
         item = item->next;
     }
-    fprintf(outputfd, "};\n\n}; // namespace android\n\n#endif ANDROID_%s_H\n", this_proxy_interface);
+    fprintf(outputfd, "};\n\n");
+
+    fprintf(outputfd, "class Bn%s : public BnInterface<%s>\n{\npublic:\n\n", this_interface, this_proxy_interface);
+    fprintf(outputfd, "enum {\n");
+    item = aitem;
+    int index = 0;
+    while (item) {
+        if (item->item_type == METHOD_TYPE)
+            fprintf(outputfd, "    %s = IBinder::FIRST_CALL_TRANSACTION + %d,\n", makeup(((method_type*)item)->name.data).c_str(), index);
+        item = item->next;
+        index++;
+    }
+    fprintf(outputfd, "};\n");
+    fprintf(outputfd, "status_t onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags);\n");
+    fprintf(outputfd, "}; // namespace android\n\n#endif ANDROID_%s_H\n", this_proxy_interface);
 }
 
 static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
 {
     interface_item_type* item = aitem;
-    int index = 0;
     fprintf(outputfd, "#define LOG_TAG \"%s\"\n", this_proxy_interface);
     fprintf(outputfd, "//#define LOG_NDEBUG 0\n");
     fprintf(outputfd, "#include <utils/Log.h>\n");
@@ -189,17 +202,8 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
     fprintf(outputfd, "#include <binder/Parcel.h>\n");
     fprintf(outputfd, "#include <%s/%s.h>\n\n", makelow(this_interface).c_str(), this_proxy_interface);
     fprintf(outputfd, "namespace android {\n\n");
-    fprintf(outputfd, "enum {\n");
-    while (item) {
-        if (item->item_type == METHOD_TYPE)
-            fprintf(outputfd, "    %s = IBinder::FIRST_CALL_TRANSACTION + %d,\n", makeup(((method_type*)item)->name.data).c_str(), index);
-        item = item->next;
-        index++;
-    }
-    fprintf(outputfd, "};\n\n");
     fprintf(outputfd, "class Bp%s : public BpInterface<%s>\n{\n", this_interface, this_proxy_interface);
     fprintf(outputfd, "    Bp%s(const sp<IBinder>& impl)\n        : BpInterface<%s>(impl)\n    {\n    }\n\n", this_interface, this_proxy_interface);
-    item = aitem;
     while (item) {
         if (item->item_type == METHOD_TYPE) {
             const method_type* method = (method_type*)item;
@@ -240,37 +244,10 @@ exit(1);
         item = item->next;
     }
     fprintf(outputfd, "};\n\nIMPLEMENT_META_INTERFACE(%s, \"android.os.%s\");\n", this_interface, this_proxy_interface);
-    fprintf(outputfd, "\n}; // namespace android\n");
-}
-
-static void generate_server_h(FILE *outputfd, interface_item_type* aitem)
-{
-    interface_item_type* item = aitem;
-    fprintf(outputfd, "class Bn%s : public BnInterface<%s>\n{\npublic:\n\n", this_interface, this_proxy_interface);
-    fprintf(outputfd, "static char const* getServiceName() { return \"%s\"; }\n", this_proxy_interface);
-    while (item) {
-        if (item->item_type == METHOD_TYPE) {
-            const method_type* method = (method_type*)item;
-            string transactCodeName = makeup(method->name.data);
-            string dimstr;
-            for (int i=0; i<(int)method->type.dimension; i++)
-                dimstr += "[]";
-            fprintf(outputfd, "virtual %s%s %s(", method->type.type.data, dimstr.c_str(), method->name.data);
-            arg_type* arg = method->args;
-            while (arg) {
-                fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->decl, arg->name.data);
-                arg = arg->next;
-                if (arg)
-                    fprintf(outputfd, ", ");
-            }
-            fprintf(outputfd, ") {}\n");
-        }
-        item = item->next;
-    }
     item = aitem;
-    fprintf(outputfd, "\nbool onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags)\n{\n");
+    //fprintf(outputfd, "static char const* getServiceName() { return \"%s\"; }\n", this_proxy_interface);
+    fprintf(outputfd, "\nstatus_t Bn%s::onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags)\n{\n", this_interface);
     fprintf(outputfd, "switch (code) {\n");
-    //fprintf(outputfd, "case INTERFACE_TRANSACTION: {\n    reply.writeString(DESCRIPTOR);\n    return true;    \n    }\n");
     while (item) {
         if (item->item_type == METHOD_TYPE) {
             int argindex = 0;
@@ -313,8 +290,8 @@ static void generate_server_h(FILE *outputfd, interface_item_type* aitem)
             }
             fprintf(outputfd, ")");
             if (strcmp(method->type.type.data, "void")) {
-printf("[%s:%d]\n", __FUNCTION__, __LINE__);
-exit(1);
+printf("[%s:%d] return type not void\n", __FUNCTION__, __LINE__);
+//exit(1);
             }
             // out parameters
             argindex = 0;
@@ -325,12 +302,12 @@ exit(1);
                 argindex++;
                 arg = arg->next;
             }
-            fprintf(outputfd, ";\n    return true;\n    }\n");
+            fprintf(outputfd, ";\n    return NO_ERROR;\n    }\n");
         }
         item = item->next;
     }
     fprintf(outputfd, "}\nreturn BBinder::onTransact(code, data, reply, flags);\n}\n");
-    fprintf(outputfd, "}\n");
+    fprintf(outputfd, "\n}; // namespace android\n");
 }
 
 static FILE *newfile(char *filebuff, const string& filename, const char *interface, const char *suffix, const string& originalSrc)
@@ -377,9 +354,6 @@ printf("[%s:%d] starting\n", __FUNCTION__, __LINE__);
     fclose(outputfd);
     outputfd = newfile(filebuff, filename, this_proxy_interface, ".cpp", originalSrc);
     generate_client_cpp(outputfd, iface->interface_items);
-    fclose(outputfd);
-    outputfd = newfile(filebuff, filename, this_interface, ".server.h", originalSrc);
-    generate_server_h(outputfd, iface->interface_items);
     fclose(outputfd);
 
     return 0;
