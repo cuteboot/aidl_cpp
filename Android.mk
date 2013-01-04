@@ -17,12 +17,14 @@ LOCAL_SRC_FILES := \
 	search_path.cpp \
 	AST.cpp \
 	Type.cpp \
+	generate_cpp.cpp \
 	generate_java.cpp \
 	generate_java_binder.cpp \
 	generate_java_rpc.cpp
 
 LOCAL_CFLAGS := -g
 LOCAL_MODULE := aidlcpp
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_HOST_EXECUTABLE)
 

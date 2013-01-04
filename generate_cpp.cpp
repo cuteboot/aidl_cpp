@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <libgen.h>
 #include "aidl_language.h"
+#include "generate_java.h" // for gather_comments()
 
 using namespace std;
 
