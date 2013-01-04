@@ -16,6 +16,7 @@ using namespace std;
 typedef struct {
     const char *name;
     const char *decl;
+    const char *declparam;
     const char *from;
     const char *to;
 } TYPEMAP;
@@ -26,18 +27,18 @@ static const char *this_interface;
 static TYPEMAP* lookup_type(const char *name)
 {
 static TYPEMAP typemap[] = {
-    {"int", "int", "%s = data.readInt32();\n", "data.writeInt32(%s);\n"},
-    {"long", "long", "%s = data.readLong();\n", "data.writeLong(%s);\n"},
-    {"byte", "byte", "%s = data.readByte();\n", "data.writeByte(%s);\n"},
-    {"boolean", "bool", "%s = (data.readInt32() != 0);\n", "data.writeInt32((int)%s);\n"},
-    {"String", "const String16&", "%s = data.readString16();\n", "data.writeString16(%s);\n"},
-    {"IBinder", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s);\n"},
-    {"CharSequence", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
-    {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&",
+    {"int", "int", "int", "%s = data.readInt32();\n", "data.writeInt32(%s);\n"},
+    {"long", "long", "long", "%s = data.readLong();\n", "data.writeLong(%s);\n"},
+    {"byte", "byte", "byte", "%s = data.readByte();\n", "data.writeByte(%s);\n"},
+    {"boolean", "bool", "bool", "%s = (data.readInt32() != 0);\n", "data.writeInt32((int)%s);\n"},
+    {"String", "String16", "const String16&", "%s = data.readString16();\n", "data.writeString16(%s);\n"},
+    {"IBinder", "const sp<IBinder>&", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s);\n"},
+    {"CharSequence", "string", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
+    {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&", "sp<IBinderThreadPriorityService>",
         "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
-    {"WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
-    {"float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
-    {0, 0, 0, 0}};
+    {"WorkSource", "WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
+    {"float", "float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
+    {0, 0, 0, 0, 0}};
 
     TYPEMAP *p = typemap;
     while (p->name && strcmp(name, p->name))
@@ -114,7 +115,7 @@ static void generate_header_file(FILE *outputfd, interface_item_type* aitem)
             fprintf(outputfd, " %s(", method->name.data);
             arg_type* arg = method->args;
             while (arg) {
-                fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->decl, arg->name.data);
+                fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->declparam, arg->name.data);
                 arg = arg->next;
                 if (arg)
                     fprintf(outputfd, ", ");
@@ -146,11 +147,11 @@ static void generate_header_file(FILE *outputfd, interface_item_type* aitem)
 static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
 {
     interface_item_type* item = aitem;
-    fprintf(outputfd, "#define LOG_TAG \"%s\"\n", this_proxy_interface);
-    fprintf(outputfd, "//#define LOG_NDEBUG 0\n");
-    fprintf(outputfd, "#include <utils/Log.h>\n");
-    fprintf(outputfd, "#include <stdint.h>\n");
-    fprintf(outputfd, "#include <sys/types.h>\n");
+    fprintf(outputfd, "#define LOG_TAG \"%s\"\n", this_interface);
+    fprintf(outputfd, "//#define LOG_NDEBUG 0\n\n");
+    //fprintf(outputfd, "#include <utils/Log.h>\n");
+    //fprintf(outputfd, "#include <stdint.h>\n");
+    //fprintf(outputfd, "#include <sys/types.h>\n");
     fprintf(outputfd, "#include <binder/Parcel.h>\n");
     fprintf(outputfd, "#include <%s/%s.h>\n\n", makelow(this_interface).c_str(), this_proxy_interface);
     fprintf(outputfd, "namespace android {\n\n");
@@ -177,7 +178,7 @@ static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
             fprintf(outputfd, " %s(", method->name.data);
             arg_type* arg = method->args;
             while (arg) {
-                fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->decl, arg->name.data);
+                fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->declparam, arg->name.data);
                 arg = arg->next;
                 if (arg)
                     fprintf(outputfd, ", ");
@@ -200,10 +201,13 @@ exit(1);
             fprintf(outputfd, "    ");
             if (return_void)
                 fprintf(outputfd, "return ");
-            fprintf(outputfd, "remote()->transact(%s, data, &reply);\n", transactCodeName.c_str());
-            if (!return_void)
-                fprintf(outputfd, "    // fail on exception\n    if (reply.readExceptionCode() != 0) return 0;\n    return reply.readInt32() != 0;\n");
-            fprintf(outputfd, "}\n");
+            fprintf(outputfd, "remote()->transact(%s, data, &reply)", transactCodeName.c_str());
+            if (!return_void) {
+                fprintf(outputfd, ";\n    // fail on exception\n    if (reply.readExceptionCode() != 0) return 0;\n    return reply.readInt32()");
+                if (!strcmp(method->type.type.data, "boolean"))
+                    fprintf(outputfd, " != 0");
+            }
+            fprintf(outputfd, ";\n}\n");
         }
         item = item->next;
     }
@@ -249,7 +253,7 @@ exit(1);
             }
             fprintf(outputfd, "    ");
             if (!return_void)
-                fprintf(outputfd, "%s res = ", lookup_type(method->type.type.data)->decl);
+                fprintf(outputfd, "int res = ");
             fprintf(outputfd, "%s(", method->name.data);
             int i = 0;
             while (argindex-- > 0) {
@@ -257,9 +261,12 @@ exit(1);
                 if (argindex > 0)
                     fprintf(outputfd, ", ");
             }
-            fprintf(outputfd, ");\n");
+            fprintf(outputfd, ")");
+            if (!strcmp(method->type.type.data, "boolean"))
+                fprintf(outputfd, "? 1 : 0");
+            fprintf(outputfd, ";\n");
             if (!return_void)
-                fprintf(outputfd, "    reply->writeNoException();\n    reply->writeInt32(res ? 1 : 0);\n");
+                fprintf(outputfd, "    reply->writeNoException();\n    reply->writeInt32(res);\n");
             // out parameters
             argindex = 0;
             arg = method->args;
