@@ -31,11 +31,11 @@ static TYPEMAP typemap[] = {
     {"byte", "byte", "%s = data.readByte();\n", "data.writeByte(%s);\n"},
     {"boolean", "bool", "%s = (data.readInt32() != 0);\n", "data.writeInt32((int)%s);\n"},
     {"String", "const String16&", "%s = data.readString16();\n", "data.writeString16(%s);\n"},
-    {"IBinder", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s->asBinder());\n"},
+    {"IBinder", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s);\n"},
     {"CharSequence", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
     {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&",
         "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
-    {"WorkSource", "WorkSource", "%s = data.readWorkSource();\n", "data.writeWorkSource(%s);\n"},
+    {"WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
     {"float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
     {0, 0, 0, 0}};
 
@@ -64,75 +64,18 @@ escape_backslashes(const string& str)
     }
     return result;
 }
-#if 0
-class Type;
-struct CppVariable
-{
-    Type* type;
-    string name;
-    int dimension;
-    CppVariable(Type* t, const string& n) :type(t), name(n), dimension(0) { };
-    virtual ~CppVariable() {};
-};
-class VariableFactory
-{
-public:
-    VariableFactory(const string& base); // base must be short
-    CppVariable* Get(Type* type);
-    CppVariable* Get(int index);
-private:
-    vector<CppVariable*> m_vars;
-    string m_base;
-    int m_index;
-};
-// =================================================
-VariableFactory::VariableFactory(const string& base) :m_base(base), m_index(0) { }
-CppVariable*
-VariableFactory::Get(Type* type)
-{
-    char name[100];
-    sprintf(name, "%s%d", m_base.c_str(), m_index);
-    m_index++;
-    CppVariable* v = new CppVariable(type, name);
-    m_vars.push_back(v);
-    return v;
-}
-CppVariable*
-VariableFactory::Get(int index)
-{
-    return m_vars[index];
-}
-// =================================================
-string
-gather_comments(extra_text_type* extra)
-{
-    string s;
-    while (extra) {
-        if (extra->which == SHORT_COMMENT) {
-            s += extra->data;
-        }
-        else if (extra->which == LONG_COMMENT) {
-            s += "/*";
-            s += extra->data;
-            s += "*/";
-        }
-        extra = extra->next;
-    }
-    return s;
-}
-string
-append(const char* a, const char* b)
-{
-    string s = a;
-    s += b;
-    return s;
-}
-#endif
 static string makeup(const char *name)
 {
-    string transactCodeName = name;
-    for(int i = 0; i < (int)transactCodeName.length(); i++)
-        transactCodeName[i] = toupper(transactCodeName[i]);
+    string transactCodeName;
+    char ch, lastch = 'A';
+    do {
+        ch = *name++;
+        if (isupper(ch) && islower(lastch))
+            transactCodeName = transactCodeName + '_';
+        lastch = ch;
+        ch = toupper(ch);
+        transactCodeName = transactCodeName + ch;
+    } while (ch);
     return transactCodeName;
 }
 
@@ -144,25 +87,31 @@ static string makelow(const char *name)
     return transactCodeName;
 }
 
-static void generate_client_h(FILE *outputfd, interface_item_type* aitem)
+static void generate_header_file(FILE *outputfd, interface_item_type* aitem)
 {
     interface_item_type* item = aitem;
-    fprintf(outputfd, "#ifndef ANDROID_%s_H\n#define ANDROID_%s_H\n\n", this_proxy_interface, this_proxy_interface);
-    fprintf(outputfd, "#include <utils/Errors.h>\n");
+    fprintf(outputfd, "#ifndef ANDROID_%s_H\n#define ANDROID_%s_H\n\n", makeup(this_proxy_interface).c_str(), makeup(this_proxy_interface).c_str());
+    //fprintf(outputfd, "#include <utils/Errors.h>\n");
     fprintf(outputfd, "#include <binder/IInterface.h>\n\n");
     fprintf(outputfd, "namespace android {\n\n");
-    fprintf(outputfd, "class %s : public IInterface\n{\npublic:\n\n", this_proxy_interface);
+    fprintf(outputfd, "class %s : public IInterface\n{\npublic:\n", this_proxy_interface);
     fprintf(outputfd, "    DECLARE_META_INTERFACE(%s);\n", this_interface);
     while (item) {
         if (item->item_type == METHOD_TYPE) {
             int i;
             const method_type* method =  (method_type*)item;
             string transactCodeName = makeup(method->name.data);
+            bool return_void = (strcmp(method->type.type.data, "void") == 0);
             
-            string dim;
+            string dimstr;
             for (i=0; i<(int)method->type.dimension; i++)
-                dim += "[]";
-            fprintf(outputfd, "    %s%s %s(", "virtual status_t"/*method->type.type.data*/, dim.c_str(), method->name.data);
+                dimstr += "[]";
+            fprintf(outputfd, "    virtual ");
+            if (return_void)
+                fprintf(outputfd, "status_t");
+            else
+                fprintf(outputfd, "%s%s", lookup_type(method->type.type.data)->decl, dimstr.c_str());
+            fprintf(outputfd, " %s(", method->name.data);
             arg_type* arg = method->args;
             while (arg) {
                 fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->decl, arg->name.data);
@@ -190,11 +139,11 @@ static void generate_client_h(FILE *outputfd, interface_item_type* aitem)
         item = item->next;
     }
     fprintf(outputfd, "    };\n");
-    fprintf(outputfd, "    status_t onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags);\n");
-    fprintf(outputfd, "}; // namespace android\n\n#endif ANDROID_%s_H\n", this_proxy_interface);
+    fprintf(outputfd, "    virtual status_t onTransact(uint32_t code, const Parcel& data,\n        Parcel *reply, uint32_t flags);\n");
+    fprintf(outputfd, "}; // namespace android\n\n#endif // ANDROID_%s_H\n", makeup(this_proxy_interface).c_str());
 }
 
-static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
+static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
 {
     interface_item_type* item = aitem;
     fprintf(outputfd, "#define LOG_TAG \"%s\"\n", this_proxy_interface);
@@ -212,12 +161,20 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
     while (item) {
         if (item->item_type == METHOD_TYPE) {
             const method_type* method = (method_type*)item;
-            string transactCodeName = makeup(method->name.data);
+            bool return_void = (strcmp(method->type.type.data, "void") == 0);
+            string transactCodeName = "::" + makeup(method->name.data);
+            transactCodeName = this_interface + transactCodeName;
+            transactCodeName = "Bn" + transactCodeName;
             string dimstr;
             for (int i=0; i<(int)method->type.dimension; i++)
                 dimstr += "[]";
             fprintf(outputfd, "%s\n", gather_comments(method->comments_token->extra).c_str());
-            fprintf(outputfd, "%s%s %s(", "virtual status_t" /*method->type.type.data*/, dimstr.c_str(), method->name.data);
+            fprintf(outputfd, "virtual ");
+            if (return_void)
+                fprintf(outputfd, "status_t");
+            else
+                fprintf(outputfd, "%s%s", lookup_type(method->type.type.data)->decl, dimstr.c_str());
+            fprintf(outputfd, " %s(", method->name.data);
             arg_type* arg = method->args;
             while (arg) {
                 fprintf(outputfd, "%s %s", lookup_type(arg->type.type.data)->decl, arg->name.data);
@@ -226,10 +183,6 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
                     fprintf(outputfd, ", ");
             }
             fprintf(outputfd, ")\n{\n    Parcel data, reply;\n");
-            if (strcmp(method->type.type.data, "void")) {
-printf("[%s:%d] result type not void\n", __FUNCTION__, __LINE__);
-//exit(1);
-            }
             fprintf(outputfd, "    data.writeInterfaceToken(%s::getInterfaceDescriptor());\n", this_proxy_interface);
             arg = method->args;
             while (arg) {
@@ -244,7 +197,13 @@ exit(1);
                 }
                 arg = arg->next;
             }
-            fprintf(outputfd, "    return remote()->transact(%s, data, &reply);\n}\n", transactCodeName.c_str());
+            fprintf(outputfd, "    ");
+            if (return_void)
+                fprintf(outputfd, "return ");
+            fprintf(outputfd, "remote()->transact(%s, data, &reply);\n", transactCodeName.c_str());
+            if (!return_void)
+                fprintf(outputfd, "    // fail on exception\n    if (reply.readExceptionCode() != 0) return 0;\n    return reply.readInt32() != 0;\n");
+            fprintf(outputfd, "}\n");
         }
         item = item->next;
     }
@@ -258,8 +217,10 @@ exit(1);
             int argindex = 0;
             const method_type* method =  (method_type*)item;
             string transactCodeName = makeup(method->name.data);
+            bool return_void = (strcmp(method->type.type.data, "void") == 0);
             
             fprintf(outputfd, "case %s: {\n", transactCodeName.c_str());
+            fprintf(outputfd, "    CHECK_INTERFACE(%s, data, reply);\n", this_proxy_interface);
             arg_type* arg = method->args;
             while (arg) {
         printf("[%s:%d] typename %s\n", __FUNCTION__, __LINE__, arg->type.type.data);
@@ -286,18 +247,19 @@ exit(1);
                 arg = arg->next;
                 argindex++;
             }
-            fprintf(outputfd, "    %s(", method->name.data);
+            fprintf(outputfd, "    ");
+            if (!return_void)
+                fprintf(outputfd, "%s res = ", lookup_type(method->type.type.data)->decl);
+            fprintf(outputfd, "%s(", method->name.data);
             int i = 0;
             while (argindex-- > 0) {
                 fprintf(outputfd, "_arg%d", i++);
                 if (argindex > 0)
                     fprintf(outputfd, ", ");
             }
-            fprintf(outputfd, ")");
-            if (strcmp(method->type.type.data, "void")) {
-printf("[%s:%d] return type not void\n", __FUNCTION__, __LINE__);
-//exit(1);
-            }
+            fprintf(outputfd, ");\n");
+            if (!return_void)
+                fprintf(outputfd, "    reply->writeNoException();\n    reply->writeInt32(res ? 1 : 0);\n");
             // out parameters
             argindex = 0;
             arg = method->args;
@@ -307,7 +269,7 @@ printf("[%s:%d] return type not void\n", __FUNCTION__, __LINE__);
                 argindex++;
                 arg = arg->next;
             }
-            fprintf(outputfd, ";\n    return NO_ERROR;\n    }\n");
+            fprintf(outputfd, "    return NO_ERROR;\n    }\n");
         }
         item = item->next;
     }
@@ -315,12 +277,12 @@ printf("[%s:%d] return type not void\n", __FUNCTION__, __LINE__);
     fprintf(outputfd, "\n}; // namespace android\n");
 }
 
-static FILE *newfile(char *filebuff, const string& filename, const char *interface, const char *suffix, const string& originalSrc)
+static FILE *newfile(char *filebuff, const string& filename, const char *suffix, const string& originalSrc)
 {
     strcpy(filebuff, filename.c_str());
     dirname(filebuff);
     strcat(filebuff, "/");
-    strcat(filebuff, interface);
+    strcat(filebuff, this_proxy_interface);
     strcat(filebuff, suffix);
     printf("outputting... filename=%s\n", filebuff);
     FILE* outputfd = fopen(filebuff, "wb");
@@ -354,11 +316,11 @@ printf("[%s:%d] error, no %d support yet!!!!!\n", __FUNCTION__, __LINE__, iface-
     char *filebuff = (char *)malloc(strlen(filename.c_str()) + strlen(this_proxy_interface) + 50);
 
 printf("[%s:%d] starting\n", __FUNCTION__, __LINE__);
-    FILE *outputfd = newfile(filebuff, filename, this_proxy_interface, ".h", originalSrc);
-    generate_client_h(outputfd, iface->interface_items);
+    FILE *outputfd = newfile(filebuff, filename, ".h", originalSrc);
+    generate_header_file(outputfd, iface->interface_items);
     fclose(outputfd);
-    outputfd = newfile(filebuff, filename, this_proxy_interface, ".cpp", originalSrc);
-    generate_client_cpp(outputfd, iface->interface_items);
+    outputfd = newfile(filebuff, filename, ".cpp", originalSrc);
+    generate_implementation(outputfd, iface->interface_items);
     fclose(outputfd);
 
     return 0;
