@@ -176,18 +176,21 @@ static void generate_client_h(FILE *outputfd, interface_item_type* aitem)
     }
     fprintf(outputfd, "};\n\n");
 
-    fprintf(outputfd, "class Bn%s : public BnInterface<%s>\n{\npublic:\n\n", this_interface, this_proxy_interface);
-    fprintf(outputfd, "enum {\n");
+    fprintf(outputfd, "class Bn%s : public BnInterface<%s>\n{\npublic:\n", this_interface, this_proxy_interface);
+    fprintf(outputfd, "    enum {\n");
     item = aitem;
-    int index = 0;
+    int once = 1;
     while (item) {
         if (item->item_type == METHOD_TYPE)
-            fprintf(outputfd, "    %s = IBinder::FIRST_CALL_TRANSACTION + %d,\n", makeup(((method_type*)item)->name.data).c_str(), index);
+            fprintf(outputfd, "        %s", makeup(((method_type*)item)->name.data).c_str());
+            if (once)
+                fprintf(outputfd, " = IBinder::FIRST_CALL_TRANSACTION");
+            once = 0;
+            fprintf(outputfd, ",\n");
         item = item->next;
-        index++;
     }
-    fprintf(outputfd, "};\n");
-    fprintf(outputfd, "status_t onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags);\n");
+    fprintf(outputfd, "    };\n");
+    fprintf(outputfd, "    status_t onTransact(uint32_t code, const Parcel& data, Parcel *reply, uint32_t flags);\n");
     fprintf(outputfd, "}; // namespace android\n\n#endif ANDROID_%s_H\n", this_proxy_interface);
 }
 
@@ -202,8 +205,10 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
     fprintf(outputfd, "#include <binder/Parcel.h>\n");
     fprintf(outputfd, "#include <%s/%s.h>\n\n", makelow(this_interface).c_str(), this_proxy_interface);
     fprintf(outputfd, "namespace android {\n\n");
-    fprintf(outputfd, "class Bp%s : public BpInterface<%s>\n{\n", this_interface, this_proxy_interface);
-    fprintf(outputfd, "    Bp%s(const sp<IBinder>& impl)\n        : BpInterface<%s>(impl)\n    {\n    }\n\n", this_interface, this_proxy_interface);
+    fprintf(outputfd, "class Bp%s : public BpInterface<%s>\n{\n",
+        this_interface, this_proxy_interface);
+    fprintf(outputfd, "    Bp%s(const sp<IBinder>& impl)\n        : BpInterface<%s>(impl) { }\n",
+        this_interface, this_proxy_interface);
     while (item) {
         if (item->item_type == METHOD_TYPE) {
             const method_type* method = (method_type*)item;
@@ -225,7 +230,7 @@ static void generate_client_cpp(FILE *outputfd, interface_item_type* aitem)
 printf("[%s:%d] result type not void\n", __FUNCTION__, __LINE__);
 //exit(1);
             }
-            fprintf(outputfd, "    data.writeInterfaceToken(%s::getInterfaceDescriptor());\n\n", this_proxy_interface);
+            fprintf(outputfd, "    data.writeInterfaceToken(%s::getInterfaceDescriptor());\n", this_proxy_interface);
             arg = method->args;
             while (arg) {
                 int dir = convert_direction(arg->direction.data);
