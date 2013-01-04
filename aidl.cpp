@@ -4,6 +4,7 @@
 #include "search_path.h"
 #include "Type.h"
 #include "generate_java.h"
+#include "generate_cpp.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/param.h>
@@ -24,6 +25,7 @@
 #endif
 
 using namespace std;
+static int generate_cpp_files = 1;
 
 static void
 test_document(document_item_type* d)
@@ -968,7 +970,11 @@ compile_aidl(Options& options)
     // make sure the folders of the output file all exists
     check_outputFilePath(options.outputFileName);
 
-    err = generate_java(options.outputFileName, options.inputFileName.c_str(),
+    if (generate_cpp_files)
+        err = generate_cpp(options.outputFileName, options.inputFileName.c_str(),
+                        (interface_type*)mainDoc);
+    else
+        err = generate_java(options.outputFileName, options.inputFileName.c_str(),
                         (interface_type*)mainDoc);
 
     return err;
