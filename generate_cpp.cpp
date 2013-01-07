@@ -38,15 +38,34 @@ static TYPEMAP typemap[] = {
         "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
     {"WorkSource", "WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
     {"float", "float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
+#if 0
+    {"IWifiClient", "const sp<IWifiClient>&", "const sp<IWifiClient>&", "%s = data.readStrongWifiClient();\n", "data.writeStrongWifiClient(%s);\n"},
+    {"ConfiguredStation", "const sp<ConfiguredStation>&", "const sp<ConfiguredStation>&", "%s = data.readStrongConfiguredStation();\n", "%s.writeToParcel(&data);\n"},
+    {"ScannedStation", "const sp<ScannedStation>&", "const sp<ScannedStation>&", "%s = data.readStrongScannedStation();\n", "%s.writeToParcel(&data);\n"},
+    {"WifiInformation", "const sp<WifiInformation>&", "const sp<WifiInformation>&", "%s = data.readStrongWifiInformation();\n", "%s.writeToParcel(&data);\n"},
+#endif
     {0, 0, 0, 0, 0}};
+
+static TYPEMAP pattern =
+    {"%s", "const sp<%s>&", "const sp<%s>&", "%%s = data.readStrong%s();\n", "%%s.writeToParcel(&data);\n"};
+static char temps[5][100];
+static TYPEMAP temp = {(const char *)temps[0], (const char *)temps[1], (const char *)temps[2], (const char *)temps[3], (const char *)temps[4]};
 
     TYPEMAP *p = typemap;
     while (p->name && strcmp(name, p->name))
         p++;
     if (!p->name) {
+        sprintf(temps[0], pattern.name, name);
+        sprintf(temps[1], pattern.decl, name);
+        sprintf(temps[2], pattern.declparam, name);
+        sprintf(temps[3], pattern.from, name);
+        sprintf(temps[4], pattern.to, name);
+        return &temp;
+#if 0
         printf ("lookup_type: failed to find '%s'\n", name);
         exit(1);
         return NULL;
+#endif
     }
     return p;
 }
@@ -189,8 +208,8 @@ static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
             while (arg) {
                 int dir = convert_direction(arg->direction.data);
                 if (dir == OUT_PARAMETER && arg->type.dimension) {
-printf("[%s:%d]\n", __FUNCTION__, __LINE__);
-exit(1);
+printf("[%s:%d] out + dim not supported\n", __FUNCTION__, __LINE__);
+//exit(1);
                 }
                 else if (dir & IN_PARAMETER) {
                     fprintf(outputfd, "    ");
@@ -227,7 +246,6 @@ exit(1);
             fprintf(outputfd, "    CHECK_INTERFACE(%s, data, reply);\n", this_proxy_interface);
             arg_type* arg = method->args;
             while (arg) {
-        printf("[%s:%d] typename %s\n", __FUNCTION__, __LINE__, arg->type.type.data);
                 char thisname[100];
                 sprintf(thisname, "_arg%d", argindex);
                 TYPEMAP* tp = lookup_type(arg->type.type.data);
@@ -291,7 +309,7 @@ static FILE *newfile(char *filebuff, const string& filename, const char *suffix,
     strcat(filebuff, "/");
     strcat(filebuff, this_proxy_interface);
     strcat(filebuff, suffix);
-    printf("outputting... filename=%s\n", filebuff);
+    //printf("outputting... filename=%s\n", filebuff);
     FILE* outputfd = fopen(filebuff, "wb");
     if (!outputfd) {
         fprintf(stderr, "unable to open %s for write\n", filebuff);
@@ -322,7 +340,7 @@ printf("[%s:%d] error, no %d support yet!!!!!\n", __FUNCTION__, __LINE__, iface-
      */
     char *filebuff = (char *)malloc(strlen(filename.c_str()) + strlen(this_proxy_interface) + 50);
 
-printf("[%s:%d] starting\n", __FUNCTION__, __LINE__);
+//printf("[%s:%d] starting\n", __FUNCTION__, __LINE__);
     FILE *outputfd = newfile(filebuff, filename, ".h", originalSrc);
     generate_header_file(outputfd, iface->interface_items);
     fclose(outputfd);
