@@ -1,0 +1,4 @@
+
+package aidl;
+
+parcelable ConfiguredStation;
