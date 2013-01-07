@@ -1,11 +1,11 @@
 package extra;
-import extra.ComposerState;
+import import.ComposerState;
 import extra.IDisplayEventConnection;
 import extra.IGraphicBufferAlloc;
 import extra.IMemoryHeap;
 import extra.ISurfaceComposerClient;
 import extra.ISurfaceTexture;
-import extra.PixelFormat;
+import import.PixelFormat;
 
 
 interface ISurfaceComposer {

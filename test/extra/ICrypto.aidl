@@ -1,5 +1,5 @@
 package extra;
-import SubSample;
+import import.SubSample;
 
 
 interface ICrypto {

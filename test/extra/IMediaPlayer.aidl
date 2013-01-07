@@ -1,31 +1,34 @@
 package extra;
 
+import extra.IStreamSource;
+import extra.ISurfaceTexture;
+import import.zParcel;
+
 interface IMediaPlayer {
     void disconnect();
-    void setDataSource(const char[] url, KeyedVectorString8String8 headers);
-    void setDataSource(int fd, long offset, long length);
-    void setDataSource(IStreamSource source);
+    void setDataSourceUrl(String url, in String[] headers);
+    void setDataSourceFd(int fd, long offset, long length);
+    void setDataSourceStream(IStreamSource source);
     void setVideoSurfaceTexture( ISurfaceTexture surfaceTexture);
     void prepareAsync();
     void start();
     void stop();
     void pause();
-    void isPlaying(bool[]  state);
+    void isPlaying(in boolean[]  state);
     void seekTo(int msec);
-    void getCurrentPosition(int[]  msec);
-    void getDuration(int[]  msec);
+    void getCurrentPosition(out int[]  msec);
+    void getDuration(out int[]  msec);
     void reset();
     void setAudioStreamType(int type);
     void setLooping(int loop);
     void setVolume(float leftVolume, float rightVolume);
     void setAuxEffectSendLevel(float level);
     void attachAuxEffect(int effectId);
-    void setParameter(int key, in Parcel request);
-    void getParameter(int key, out Parcel reply);
-    void setRetransmitEndpoint(sockaddr_in endpoint);
+    void setParameter(int key, in zParcel request);
+    void getParameter(int key, out zParcel[] reply);
+    void setRetransmitEndpoint(int endpoint);
     void setNextPlayer(IMediaPlayer next);
-    void invoke(in Parcel request, out Parcel reply);
-    void setMetadataFilter(in Parcel filter);
-    void getMetadata(boolean update_only,
-    boolean apply_filter, Parcel[] metadata);
+    void invoke(in zParcel request, out zParcel[] reply);
+    void setMetadataFilter(in zParcel filter);
+    void getMetadata(boolean update_only, boolean apply_filter, out zParcel[] metadata);
 }

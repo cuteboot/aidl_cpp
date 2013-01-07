@@ -3,7 +3,7 @@ import extra.ICamera;
 import extra.ICameraRecordingProxy;
 import extra.IMediaRecorderClient;
 import extra.ISurfaceTexture;
-import extra.Surface;
+import import.Surface;
 
 
 interface IMediaRecorder {

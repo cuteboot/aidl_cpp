@@ -1,7 +1,7 @@
 package extra;
-import extra.GraphicBuffer;
+import import.GraphicBuffer;
 
 
 interface IGraphicBufferAlloc {
-    GraphicBuffer createGraphicBuffer(int w, int h, int format, int usage, void[]  error);
+    GraphicBuffer createGraphicBuffer(int w, int h, int format, int usage, out void[]  error);
 }

@@ -1,5 +1,5 @@
 package extra;
-import omx_message;
+import import.omx_message;
 
 
 interface IOMXObserver {

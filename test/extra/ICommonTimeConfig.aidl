@@ -1,5 +1,5 @@
 package extra;
-import sockaddr_storage;
+import import.sockaddr_storage;
 
 
 interface ICommonTimeConfig {

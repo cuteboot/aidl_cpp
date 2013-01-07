@@ -2,8 +2,6 @@ package extra;
 import extra.ICameraClient;
 import extra.IMemory;
 import extra.ISurfaceTexture;
-import extra.String8;
-import extra.Surface;
 
 
 interface ICamera {
@@ -11,9 +9,8 @@ interface ICamera {
     void connect(ICameraClient client);
     void lock();
     void unlock();
-    void setPreviewDisplay(Surface surface);
-    void setPreviewTexture(
-    ISurfaceTexture surfaceTexture);
+    void setPreviewDisplay(int surface);
+    void setPreviewTexture(ISurfaceTexture surfaceTexture);
     void setPreviewCallbackFlag(int flag);
     void startPreview();
     void stopPreview();
@@ -26,7 +23,7 @@ interface ICamera {
     void cancelAutoFocus();
     void takePicture(int msgType);
     void setParameters(String params);
-    String8 getParameters();
+    String getParameters();
     void sendCommand(int cmd, int arg1, int arg2);
     void storeMetaDataInBuffers(boolean enabled);
 }

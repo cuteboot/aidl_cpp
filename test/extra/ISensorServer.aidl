@@ -1,6 +1,6 @@
 package extra;
 import extra.ISensorEventConnection;
-import extra.Sensor;
+import import.Sensor;
 
 
 interface ISensorServer {

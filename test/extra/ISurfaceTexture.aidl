@@ -1,7 +1,7 @@
 package extra;
-import extra.GraphicBuffer;
-import extra.QueueBufferInput;
-import extra.QueueBufferOutput;
+import import.GraphicBuffer;
+import import.QueueBufferInput;
+import import.QueueBufferOutput;
 
 
 interface ISurfaceTexture {

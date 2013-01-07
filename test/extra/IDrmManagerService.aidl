@@ -1,14 +1,15 @@
 package extra;
-import extra.ActionDescription;
-import extra.DecryptHandle;
-import extra.DrmBuffer;
-import extra.DrmConstraints;
-import extra.DrmConvertedStatus;
-import extra.DrmInfo;
-import extra.DrmInfoStatus;
-import extra.DrmMetadata;
-import extra.DrmRights;
-import extra.DrmSupportInfo_ptr;
+import import.ActionDescription;
+import import.DecryptHandle;
+import import.DrmBuffer;
+import import.DrmConstraints;
+import import.DrmConvertedStatus;
+import import.DrmInfo;
+import import.DrmInfoStatus;
+import import.DrmMetadata;
+import import.DrmRights;
+import import.DrmSupportInfo_ptr;
+import import.DrmInfoRequest;
 import extra.IDrmServiceListener;
 
 
@@ -39,10 +40,10 @@ interface IDrmManagerService {
     void getAllSupportInfo( int uniqueId, int  length, out DrmSupportInfo_ptr[]  drmSupportInfoArray);
     DecryptHandle[]  openDecryptSession( int uniqueId, int fd, long offset, long length, in String  mime);
     DecryptHandle[]  openDecryptSessionFromUri( int uniqueId, in String  uri, in String  mime);
-    void closeDecryptSession(int uniqueId, DecryptHandle[]  decryptHandle);
-    void initializeDecryptUnit(int uniqueId, DecryptHandle[]  decryptHandle, int decryptUnitId, in DrmBuffer[]  headerInfo);
-    void decrypt(int uniqueId, DecryptHandle[]  decryptHandle, int decryptUnitId,
+    void closeDecryptSession(int uniqueId, in DecryptHandle[]  decryptHandle);
+    void initializeDecryptUnit(int uniqueId, in DecryptHandle[]  decryptHandle, int decryptUnitId, in DrmBuffer[]  headerInfo);
+    void decrypt(int uniqueId, in DecryptHandle[]  decryptHandle, int decryptUnitId,
     in DrmBuffer[]  encBuffer, out DrmBuffer[]  decBuffer, out DrmBuffer[]  IV);
-    void finalizeDecryptUnit( int uniqueId, DecryptHandle[]  decryptHandle, int decryptUnitId);
+    void finalizeDecryptUnit( int uniqueId, in DecryptHandle[]  decryptHandle, int decryptUnitId);
     int pread(int uniqueId, in DecryptHandle[] decryptHandle, out void[] buffer, int numBytes, long offset);
 }
