@@ -77,6 +77,7 @@ brackets    \[{whitespace}?\]
 \(              { SET_BUFFER('('); return '('; }
 \)              { SET_BUFFER(')'); return ')'; }
 ,               { SET_BUFFER(','); return ','; }
+\*              { SET_BUFFER('*'); return '*'; }
 
     /* keywords */
 parcelable      { SET_BUFFER(PARCELABLE); return PARCELABLE; }

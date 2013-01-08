@@ -487,7 +487,9 @@ check_method(const char* filename, int kind, method_type* m)
         }
 
         if (arg->direction.data == NULL
-                && (arg->type.dimension != 0 || t->CanBeOutParameter())) {
+                && (arg->type.dimension != 0 || t->CanBeOutParameter()
+                   || (arg->type.array_token.data && !strcmp(arg->type.array_token.data, "*"))
+                   )) {
             fprintf(stderr, "%s:%d parameter %d: '%s %s' can be an out"
                                 " parameter, so you must declare it as in,"
                                 " out or inout.\n",
@@ -498,6 +500,7 @@ check_method(const char* filename, int kind, method_type* m)
 
         if (convert_direction(arg->direction.data) != IN_PARAMETER
                 && !t->CanBeOutParameter()
+                && !(arg->type.array_token.data && !strcmp(arg->type.array_token.data, "*"))
                 && arg->type.dimension == 0) {
             fprintf(stderr, "%s:%d parameter %d: '%s %s %s' can only be an in"
                             " parameter.\n",

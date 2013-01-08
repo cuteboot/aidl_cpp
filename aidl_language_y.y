@@ -283,6 +283,11 @@ type:
                                     $$.type.array_token = $2.buffer;
                                     $$.type.dimension = count_brackets($2.buffer.data);
                                 }
+    |   IDENTIFIER '*'        {
+                                    $$.type.type = $1.buffer;
+                                    $$.type.array_token = $2.buffer;
+                                    $$.type.dimension = count_brackets($2.buffer.data);
+                                }
     |   GENERIC                 {
                                     $$.type.type = $1.buffer;
                                     init_buffer_type(&$$.type.array_token, yylineno);
