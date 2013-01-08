@@ -15,7 +15,7 @@ interface ISurfaceComposer {
     void setTransactionState(in ComposerState[] state,
         int orientation, int flags);
     void bootFinished();
-    void captureScreen(int dpy, in IMemoryHeap[]  heap,
+    void captureScreen(int dpy, in IMemoryHeap * heap,
         in int[]  width, in int[]  height, in PixelFormat[]  format,
         int reqWidth, int reqHeight, int minLayerZ, int maxLayerZ);
     void turnElectronBeamOff(int mode);

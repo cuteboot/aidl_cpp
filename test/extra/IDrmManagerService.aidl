@@ -8,7 +8,7 @@ import import.DrmInfo;
 import import.DrmInfoStatus;
 import import.DrmMetadata;
 import import.DrmRights;
-import import.DrmSupportInfo_ptr;
+import import.DrmSupportInfo;
 import import.DrmInfoRequest;
 import extra.IDrmServiceListener;
 
@@ -45,7 +45,7 @@ interface IDrmManagerService {
         in DrmBuffer[]  inputData);
     DrmConvertedStatus[]  closeConvertSession(int uniqueId, int convertId);
     void getAllSupportInfo( int uniqueId, int  length,
-        out DrmSupportInfo_ptr[]  drmSupportInfoArray);
+        out DrmSupportInfo *  drmSupportInfoArray);
     DecryptHandle[]  openDecryptSession( int uniqueId, int fd,
         long offset, long length, in String  mime);
     DecryptHandle[]  openDecryptSessionFromUri( int uniqueId,

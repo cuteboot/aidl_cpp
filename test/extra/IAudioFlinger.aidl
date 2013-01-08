@@ -4,6 +4,7 @@ import extra.IAudioRecord;
 import extra.IAudioTrack;
 import extra.IEffect;
 import extra.IEffectClient;
+import import.status_t;
 
 
 import extra.IAudioFlingerClient;
@@ -12,7 +13,7 @@ interface IAudioFlinger {
     IAudioTrack createTrack( int pid, int streamType, int sampleRate,
         int format, int channelMask, int frameCount, int flags,
         IMemory sharedBuffer, int output, int tid,
-        out int[] sessionId, out void[] status);
+        inout int * sessionId, out status_t * status);
     IAudioRecord openRecord( int pid, int input, int sampleRate,
         int format, int channelMask, int frameCount, int flags,
         out int[] sessionId, out void[] status);

@@ -6,7 +6,6 @@ import extra.IOMXObserver;
 import import.ListComponentInfo;
 import import.node_id;
 import import.omx_message;
-import import.void_ptr;
 
 
 interface IOMX {
@@ -28,7 +27,7 @@ interface IOMX {
         in GraphicBuffer graphicBuffer, in buffer_id[] buffer);
     void storeMetaDataInBuffers( int node, int port_index, boolean enable);
     void allocateBuffer( int node, int port_index, int size,
-        out buffer_id[] buffer, out void_ptr[] buffer_data);
+        out buffer_id[] buffer, out int * buffer_data);
     void allocateBufferWithBackup( int node, int port_index,
         IMemory params, out buffer_id[] buffer);
     void freeBuffer( int node, int port_index, int buffer);
