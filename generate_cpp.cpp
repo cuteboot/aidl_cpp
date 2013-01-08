@@ -30,20 +30,16 @@ static TYPEMAP typemap[] = {
     {"int", "int", "int", "%s = data.readInt32();\n", "data.writeInt32(%s);\n"},
     {"long", "long", "long", "%s = data.readLong();\n", "data.writeLong(%s);\n"},
     {"byte", "byte", "byte", "%s = data.readByte();\n", "data.writeByte(%s);\n"},
-    {"boolean", "bool", "bool", "%s = (data.readInt32() != 0);\n", "data.writeInt32((int)%s);\n"},
+    {"boolean", "bool", "bool", "%s = data.readInt32();\n", "data.writeInt32((int)%s);\n"},
     {"String", "String16", "const String16&", "%s = data.readString16();\n", "data.writeString16(%s);\n"},
+    {"String8", "String8", "const String8&", "%s = data.readString8();\n", "data.writeString8(%s);\n"},
+    {"CString", "CString", "const CString&", "%s = data.readCString();\n", "data.writeCString(%s);\n"},
     {"IBinder", "const sp<IBinder>&", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s);\n"},
     {"CharSequence", "string", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
     {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&", "sp<IBinderThreadPriorityService>",
         "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
     {"WorkSource", "WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
     {"float", "float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
-#if 0
-    {"IWifiClient", "const sp<IWifiClient>&", "const sp<IWifiClient>&", "%s = data.readStrongWifiClient();\n", "data.writeStrongWifiClient(%s);\n"},
-    {"ConfiguredStation", "const sp<ConfiguredStation>&", "const sp<ConfiguredStation>&", "%s = data.readStrongConfiguredStation();\n", "%s.writeToParcel(&data);\n"},
-    {"ScannedStation", "const sp<ScannedStation>&", "const sp<ScannedStation>&", "%s = data.readStrongScannedStation();\n", "%s.writeToParcel(&data);\n"},
-    {"WifiInformation", "const sp<WifiInformation>&", "const sp<WifiInformation>&", "%s = data.readStrongWifiInformation();\n", "%s.writeToParcel(&data);\n"},
-#endif
     {0, 0, 0, 0, 0}};
 
 static TYPEMAP pattern =
@@ -223,8 +219,6 @@ printf("[%s:%d] out + dim not supported\n", __FUNCTION__, __LINE__);
             fprintf(outputfd, "remote()->transact(%s, data, &reply)", transactCodeName.c_str());
             if (!return_void) {
                 fprintf(outputfd, ";\n    // fail on exception\n    if (reply.readExceptionCode() != 0) return 0;\n    return reply.readInt32()");
-                if (!strcmp(method->type.type.data, "boolean"))
-                    fprintf(outputfd, " != 0");
             }
             fprintf(outputfd, ";\n}\n");
         }
@@ -264,8 +258,10 @@ printf("[%s:%d] out + dim not supported\n", __FUNCTION__, __LINE__);
                     exit(1);
                     }
 #endif
+#if 0
                 else
                     fprintf(stderr, "aidl:OUT param %s:%d\n", __FILE__, __LINE__);
+#endif
                 arg = arg->next;
                 argindex++;
             }
