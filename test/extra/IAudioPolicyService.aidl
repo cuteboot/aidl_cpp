@@ -21,12 +21,12 @@ interface IAudioPolicyService {
     void getStreamVolumeIndex(int stream, int index, int device);
     int getStrategyForStream(int stream);
     int getDevicesForStream(int stream);
-    int getOutputForEffect(out int[] desc);
-    void registerEffect(in int[] desc, int io, int strategy, int session,
+    int getOutputForEffect(out int * desc);
+    void registerEffect(in int * desc, int io, int strategy, int session,
         int id);
     void unregisterEffect(int id);
     void setEffectEnabled(int id, boolean enabled);
     boolean isStreamActive(int stream, int inPastMs );
-    void queryDefaultPreProcessing(int audioSession, in int[] descriptors,
+    void queryDefaultPreProcessing(int audioSession, in int * descriptors,
         int count);
 }

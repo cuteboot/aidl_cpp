@@ -6,6 +6,6 @@ import extra.ICameraClient;
 
 interface ICameraService {
     int getNumberOfCameras();
-    void getCameraInfo(int cameraId, out CameraInfo[]  cameraInfo);
+    void getCameraInfo(int cameraId, out CameraInfo *  cameraInfo);
     ICamera connect(ICameraClient cameraClient, int cameraId);
 }

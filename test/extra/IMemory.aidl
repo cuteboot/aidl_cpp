@@ -3,5 +3,5 @@ import extra.IMemoryHeap;
 
 
 interface IMemory {
-    IMemoryHeap getMemory(in long[]  offset , in long[]  size);
+    IMemoryHeap getMemory(in long *  offset , in long *  size);
 }

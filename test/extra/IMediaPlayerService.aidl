@@ -14,12 +14,12 @@ interface IMediaPlayerService {
     IMediaMetadataRetriever createMetadataRetriever(int pid);
     IMediaPlayer create(int pid, IMediaPlayerClient client,
         int audioSessionId );
-    IMemory decodeUrl(String  url, in int[] pSampleRate,
-        in int[]  pNumChannels, in int[]  pFormat);
+    IMemory decodeUrl(String  url, in int * pSampleRate,
+        in int *  pNumChannels, in int *  pFormat);
     IMemory decodeFd(int fd, long offset, long length,
-        in int[] pSampleRate, in int[]  pNumChannels, in int[]  pFormat);
+        in int * pSampleRate, in int *  pNumChannels, in int *  pFormat);
     IOMX getOMX();
     ICrypto makeCrypto();
     void addBatteryData(int params);
-    void pullBatteryData(out zParcel[]  reply);
+    void pullBatteryData(out zParcel *  reply);
 }

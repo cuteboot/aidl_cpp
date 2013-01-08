@@ -16,7 +16,7 @@ interface IAudioFlinger {
         inout int * sessionId, out status_t * status);
     IAudioRecord openRecord( int pid, int input, int sampleRate,
         int format, int channelMask, int frameCount, int flags,
-        out int[] sessionId, out void[] status);
+        out int * sessionId, out void * status);
     int sampleRate(int output);
     int channelCount(int output);
     int format(int output);
@@ -37,14 +37,14 @@ interface IAudioFlinger {
     String getParameters(int ioHandle, String keys);
     void registerClient(IAudioFlingerClient client);
     int getInputBufferSize(int sampleRate, int format, int channelCount);
-    int openOutput(int module, in int[] pDevices, int pSamplingRate,
-        int pFormat, in int[] pChannelMask, int pLatencyMs, int flags);
+    int openOutput(int module, in int * pDevices, int pSamplingRate,
+        int pFormat, in int * pChannelMask, int pLatencyMs, int flags);
     int openDuplicateOutput(int output1, int output2);
     void closeOutput(int output);
     void suspendOutput(int output);
     void restoreOutput(int output);
-    int openInput(int module, in int[] pDevices, int pSamplingRate,
-        int pFormat, in int[] pChannelMask);
+    int openInput(int module, in int * pDevices, int pSamplingRate,
+        int pFormat, in int * pChannelMask);
     void closeInput(int input);
     void setStreamOutput(int stream, int output);
     void setVoiceVolume(float volume);
@@ -54,10 +54,10 @@ interface IAudioFlinger {
     void acquireAudioSessionId(int audioSession);
     void releaseAudioSessionId(int audioSession);
     void queryNumberEffects(int numEffects);
-    void queryEffect(int index, in int[] pDescriptor);
-    void getEffectDescriptor(in int[] pEffectUUID, in int[] pDescriptor);
-    IEffect createEffect(int pid, in int[] pDesc, IEffectClient client,
-        int priority, int output, int sessionId, out void[] status,
+    void queryEffect(int index, in int * pDescriptor);
+    void getEffectDescriptor(in int * pEffectUUID, in int * pDescriptor);
+    IEffect createEffect(int pid, in int * pDesc, IEffectClient client,
+        int priority, int output, int sessionId, out void * status,
         int id, int enabled);
     void moveEffects(int session, int srcOutput, int dstOutput);
     int loadHwModule(in String name);

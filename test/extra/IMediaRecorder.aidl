@@ -21,7 +21,7 @@ interface IMediaRecorder {
     void setParameters(String params);
     void setListener(in IMediaRecorderClient listener);
     void prepare();
-    void getMaxAmplitude(out int[]  max);
+    void getMaxAmplitude(out int *  max);
     void start();
     void stop();
     void reset();

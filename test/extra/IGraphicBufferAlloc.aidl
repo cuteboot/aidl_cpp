@@ -4,5 +4,5 @@ import import.GraphicBuffer;
 
 interface IGraphicBufferAlloc {
     GraphicBuffer createGraphicBuffer(int w, int h, int format,
-        int usage, out void[]  error);
+        int usage, out void *  error);
 }

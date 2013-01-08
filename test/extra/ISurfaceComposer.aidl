@@ -12,11 +12,11 @@ interface ISurfaceComposer {
     ISurfaceComposerClient createConnection();
     IGraphicBufferAlloc createGraphicBufferAlloc();
     IMemoryHeap getCblk();
-    void setTransactionState(in ComposerState[] state,
+    void setTransactionState(in ComposerState * state,
         int orientation, int flags);
     void bootFinished();
     void captureScreen(int dpy, in IMemoryHeap * heap,
-        in int[]  width, in int[]  height, in PixelFormat[]  format,
+        in int *  width, in int *  height, in PixelFormat *  format,
         int reqWidth, int reqHeight, int minLayerZ, int maxLayerZ);
     void turnElectronBeamOff(int mode);
     void turnElectronBeamOn(int mode);

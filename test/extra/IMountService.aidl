@@ -14,7 +14,7 @@ interface IMountService {
     int unmountVolume( String mountPoint, boolean force,
         boolean removeEncryption);
     int formatVolume(in String mountPoint);
-    int getStorageUsers(in String mountPoint, out int[] users);
+    int getStorageUsers(in String mountPoint, out int * users);
     int getVolumeState(in String mountPoint);
     int createSecureContainer(in String id, int sizeMb,
         String fstype, String key, int ownerUid);
@@ -25,7 +25,7 @@ interface IMountService {
     boolean isSecureContainerMounted(in String id);
     int renameSecureContainer(in String oldId, String newId);
     boolean getSecureContainerPath(in String id, String path);
-    int getSecureContainerList(in String id, out String[] containers);
+    int getSecureContainerList(in String id, out String * containers);
     void shutdown(IMountShutdownObserver observer);
     void finishMediaUpdate();
     void mountObb(in String filename, String key,
