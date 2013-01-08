@@ -11,11 +11,13 @@ interface IMountService {
     void setUsbMassStorageEnabled(boolean enable);
     boolean isUsbMassStorageEnabled();
     int mountVolume(in String mountPoint);
-    int unmountVolume( String mountPoint, boolean force, boolean removeEncryption);
+    int unmountVolume( String mountPoint, boolean force,
+        boolean removeEncryption);
     int formatVolume(in String mountPoint);
     int getStorageUsers(in String mountPoint, out int[] users);
     int getVolumeState(in String mountPoint);
-    int createSecureContainer(in String id, int sizeMb, String fstype, String key, int ownerUid);
+    int createSecureContainer(in String id, int sizeMb,
+        String fstype, String key, int ownerUid);
     int finalizeSecureContainer(in String id);
     int destroySecureContainer(in String id);
     int mountSecureContainer(in String id, String key, int ownerUid);
@@ -26,8 +28,10 @@ interface IMountService {
     int getSecureContainerList(in String id, out String[] containers);
     void shutdown(IMountShutdownObserver observer);
     void finishMediaUpdate();
-    void mountObb(in String filename, String key, IObbActionListener token, int nonce);
-    void unmountObb(in String filename, boolean force, IObbActionListener token, int nonce);
+    void mountObb(in String filename, String key,
+        IObbActionListener token, int nonce);
+    void unmountObb(in String filename, boolean force,
+        IObbActionListener token, int nonce);
     boolean isObbMounted(in String filename);
     boolean getMountedObbPath(in String filename, String path);
     int decryptStorage(in String password);

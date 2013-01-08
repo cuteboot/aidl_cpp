@@ -6,11 +6,13 @@ interface IAudioPolicyService {
     void setPhoneState(int state);
     void setForceUse(int usage, int config);
     int getForceUse(int usage);
-    int getOutput(int stream, int samplingRate , int format, int channels , int flags);
+    int getOutput(int stream, int samplingRate , int format, int channels ,
+        int flags);
     void startOutput(int output, int stream, int session );
     void stopOutput(int output, int stream, int session );
     void releaseOutput(int output);
-    int getInput(int inputSource, int samplingRate , int format, int channels , int acoustics, int audioSession );
+    int getInput(int inputSource, int samplingRate , int format, int channels ,
+        int acoustics, int audioSession );
     void startInput(int input);
     void stopInput(int input);
     void releaseInput(int input);
@@ -20,9 +22,11 @@ interface IAudioPolicyService {
     int getStrategyForStream(int stream);
     int getDevicesForStream(int stream);
     int getOutputForEffect(out int[] desc);
-    void registerEffect(in int[] desc, int io, int strategy, int session, int id);
+    void registerEffect(in int[] desc, int io, int strategy, int session,
+        int id);
     void unregisterEffect(int id);
     void setEffectEnabled(int id, boolean enabled);
     boolean isStreamActive(int stream, int inPastMs );
-    void queryDefaultPreProcessing(int audioSession, in int[] descriptors, int count);
+    void queryDefaultPreProcessing(int audioSession, in int[] descriptors,
+        int count);
 }

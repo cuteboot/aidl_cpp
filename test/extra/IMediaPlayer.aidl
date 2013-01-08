@@ -30,5 +30,6 @@ interface IMediaPlayer {
     void setNextPlayer(IMediaPlayer next);
     void invoke(in zParcel request, out zParcel[] reply);
     void setMetadataFilter(in zParcel filter);
-    void getMetadata(boolean update_only, boolean apply_filter, out zParcel[] metadata);
+    void getMetadata(boolean update_only, boolean apply_filter,
+        out zParcel[] metadata);
 }
