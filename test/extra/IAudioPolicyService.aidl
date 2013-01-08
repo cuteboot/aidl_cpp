@@ -1,32 +1,37 @@
 package extra;
 
+import import.CString;
+import import.status_t;
+import import.effect_descriptor_t;
+
 interface IAudioPolicyService {
-    void setDeviceConnectionState(int device, int state, String device_address);
-    int getDeviceConnectionState(int device, String device_address);
-    void setPhoneState(int state);
-    void setForceUse(int usage, int config);
+    status_t setDeviceConnectionState(int device, int state, in CString device_address);
+    int getDeviceConnectionState(int device, in CString device_address);
+    status_t setPhoneState(int state);
+    status_t setRingerMode_unused();
+    status_t setForceUse(int usage, int config);
     int getForceUse(int usage);
     int getOutput(int stream, int samplingRate , int format, int channels ,
         int flags);
-    void startOutput(int output, int stream, int session );
-    void stopOutput(int output, int stream, int session );
-    void releaseOutput(int output);
+    status_t startOutput(int output, int stream, int session );
+    status_t stopOutput(int output, int stream, int session );
+    status_t releaseOutput(int output);
     int getInput(int inputSource, int samplingRate , int format, int channels ,
         int acoustics, int audioSession );
-    void startInput(int input);
-    void stopInput(int input);
-    void releaseInput(int input);
-    void initStreamVolume(int stream, int indexMin, int indexMax);
-    void setStreamVolumeIndex(int stream, int index, int device);
-    void getStreamVolumeIndex(int stream, int index, int device);
+    status_t startInput(int input);
+    status_t stopInput(int input);
+    status_t releaseInput(int input);
+    status_t initStreamVolume(int stream, int indexMin, int indexMax);
+    status_t setStreamVolumeIndex(int stream, int index, int device);
+    status_t getStreamVolumeIndex(int stream, out int * index, int device);
     int getStrategyForStream(int stream);
-    int getDevicesForStream(int stream);
-    int getOutputForEffect(out int * desc);
-    void registerEffect(in int * desc, int io, int strategy, int session,
+    int getOutputForEffect(in effect_descriptor_t * desc);
+    status_t registerEffect(in effect_descriptor_t * desc, int io, int strategy, int session,
         int id);
-    void unregisterEffect(int id);
-    void setEffectEnabled(int id, boolean enabled);
+    status_t unregisterEffect(int id);
     boolean isStreamActive(int stream, int inPastMs );
-    void queryDefaultPreProcessing(int audioSession, in int * descriptors,
-        int count);
+    int getDevicesForStream(int stream);
+    status_t queryDefaultPreProcessing(int audioSession, out effect_descriptor_t * descriptors,
+        out int * count);
+    status_t setEffectEnabled(int id, boolean enabled);
 }

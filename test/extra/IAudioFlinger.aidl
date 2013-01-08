@@ -5,6 +5,10 @@ import extra.IAudioTrack;
 import extra.IEffect;
 import extra.IEffectClient;
 import import.status_t;
+import import.String8;
+import import.CString;
+import import.effect_uuid_t;
+import import.effect_descriptor_t;
 
 
 import extra.IAudioFlingerClient;
@@ -16,49 +20,50 @@ interface IAudioFlinger {
         inout int * sessionId, out status_t * status);
     IAudioRecord openRecord( int pid, int input, int sampleRate,
         int format, int channelMask, int frameCount, int flags,
-        out int * sessionId, out void * status);
+        inout int * sessionId, out void * status);
     int sampleRate(int output);
     int channelCount(int output);
     int format(int output);
     long frameCount(int output);
     int latency(int output);
-    void setMasterVolume(float value);
-    void setMasterMute(boolean muted);
+    status_t setMasterVolume(float value);
+    status_t setMasterMute(boolean muted);
     float masterVolume();
     boolean masterMute();
-    void setStreamVolume(int stream, float value, int output);
-    void setStreamMute(int stream, boolean muted);
+    status_t setStreamVolume(int stream, float value, int output);
+    status_t setStreamMute(int stream, boolean muted);
     float streamVolume(int stream, int output);
     boolean streamMute(int stream);
-    void setMode(int mode);
-    void setMicMute(boolean state);
+    status_t setMode(int mode);
+    status_t setMicMute(boolean state);
     boolean getMicMute();
-    void setParameters(int ioHandle, String keyValuePairs);
-    String getParameters(int ioHandle, String keys);
-    void registerClient(IAudioFlingerClient client);
+    status_t setParameters(int ioHandle, in String8 keyValuePairs);
+    String8 getParameters(int ioHandle, in String8 keys);
+    status_t registerClient(IAudioFlingerClient client);
     int getInputBufferSize(int sampleRate, int format, int channelCount);
-    int openOutput(int module, in int * pDevices, int pSamplingRate,
-        int pFormat, in int * pChannelMask, int pLatencyMs, int flags);
+    int openOutput(int module, inout int * pDevices, inout int * pSamplingRate,
+        inout int * pFormat, inout int * pChannelMask, inout int * pLatencyMs, int flags);
     int openDuplicateOutput(int output1, int output2);
-    void closeOutput(int output);
-    void suspendOutput(int output);
-    void restoreOutput(int output);
-    int openInput(int module, in int * pDevices, int pSamplingRate,
-        int pFormat, in int * pChannelMask);
-    void closeInput(int input);
-    void setStreamOutput(int stream, int output);
-    void setVoiceVolume(float volume);
-    void getRenderPosition(int halFrames, int dspFrames, int output);
+    status_t closeOutput(int output);
+    status_t suspendOutput(int output);
+    status_t restoreOutput(int output);
+    int openInput(int module, inout int * pDevices, inout int * pSamplingRate,
+        inout int * pFormat, inout int * pChannelMask);
+    status_t closeInput(int input);
+    status_t setStreamOutput(int stream, int output);
+    status_t setVoiceVolume(float volume);
+    void getRenderPosition(out int * halFrames, out int * dspFrames, int output);
     int getInputFramesLost(int ioHandle);
     int newAudioSessionId();
-    void acquireAudioSessionId(int audioSession);
-    void releaseAudioSessionId(int audioSession);
-    void queryNumberEffects(int numEffects);
-    void queryEffect(int index, in int * pDescriptor);
-    void getEffectDescriptor(in int * pEffectUUID, in int * pDescriptor);
-    IEffect createEffect(int pid, in int * pDesc, IEffectClient client,
-        int priority, int output, int sessionId, out void * status,
-        int id, int enabled);
-    void moveEffects(int session, int srcOutput, int dstOutput);
-    int loadHwModule(in String name);
+    status_t acquireAudioSessionId(int audioSession);
+    status_t releaseAudioSessionId(int audioSession);
+    status_t queryNumberEffects(out int * numEffects);
+    status_t queryEffect(int index, out effect_descriptor_t * pDescriptor);
+    status_t getEffectDescriptor(in effect_uuid_t * pEffectUUID, out effect_descriptor_t * pDescriptor);
+    // createEffect: response has pDesc data last!
+    IEffect createEffect(int pid, inout effect_descriptor_t * pDesc, IEffectClient client,
+        int priority, int output, int sessionId, out status_t * status,
+        out int * id, out int * enabled);
+    status_t moveEffects(int session, int srcOutput, int dstOutput);
+    int loadHwModule(in CString name);
 }

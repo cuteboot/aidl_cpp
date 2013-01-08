@@ -2,28 +2,32 @@ package extra;
 import extra.ICameraClient;
 import extra.IMemory;
 import extra.ISurfaceTexture;
+import import.status_t;
+import import.String8;
+import import.CString;
+import import.Surface;
 
 
 interface ICamera {
     void disconnect();
-    void connect(ICameraClient client);
-    void lock();
-    void unlock();
-    void setPreviewDisplay(int surface);
-    void setPreviewTexture(ISurfaceTexture surfaceTexture);
+    status_t setPreviewDisplay(in Surface surface);
+    status_t setPreviewTexture(ISurfaceTexture surfaceTexture);
     void setPreviewCallbackFlag(int flag);
-    void startPreview();
-    void stopPreview();
+    status_t startPreview();
+    status_t stopPreview();
+    status_t autoFocus();
+    status_t cancelAutoFocus();
+    status_t takePicture(int msgType);
+    status_t setParameters(in String8 params);
+    String8 getParameters();
+    status_t sendCommand(int cmd, int arg1, int arg2);
+    status_t connect(ICameraClient client);
+    status_t lock();
+    status_t unlock();
     boolean previewEnabled();
-    void startRecording();
+    status_t startRecording();
     void stopRecording();
     boolean recordingEnabled();
     void releaseRecordingFrame(IMemory mem);
-    void autoFocus();
-    void cancelAutoFocus();
-    void takePicture(int msgType);
-    void setParameters(String params);
-    String getParameters();
-    void sendCommand(int cmd, int arg1, int arg2);
-    void storeMetaDataInBuffers(boolean enabled);
+    status_t storeMetaDataInBuffers(boolean enabled);
 }
