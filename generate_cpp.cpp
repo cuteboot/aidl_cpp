@@ -265,7 +265,7 @@ printf("[%s:%d] out + dim not supported\n", __FUNCTION__, __LINE__);
                     }
 #endif
                 else
-                    fprintf(stderr, "aidl:internal error %s:%d\n", __FILE__, __LINE__);
+                    fprintf(stderr, "aidl:OUT param %s:%d\n", __FILE__, __LINE__);
                 arg = arg->next;
                 argindex++;
             }
