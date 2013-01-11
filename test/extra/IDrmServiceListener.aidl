@@ -1,7 +1,8 @@
 package extra;
 import import.DrmInfoEvent;
+import import.status_t;
 
 
 interface IDrmServiceListener {
-    void notify(out DrmInfoEvent event);
+    status_t notify(in DrmInfoEvent event);
 }

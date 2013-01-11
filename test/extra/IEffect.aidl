@@ -1,11 +1,12 @@
 package extra;
 import extra.IMemory;
+import import.status_t;
 
 
 interface IEffect {
-    void enable();
-    void disable();
-    void command(int cmdCode, int cmdSize, in void * pCmdData,
+    status_t enable();
+    status_t disable();
+    status_t command(int cmdCode, int cmdSize, in void * pCmdData,
         inout int * pReplySize, out void * pReplyData);
     void disconnect();
     IMemory getCblk();

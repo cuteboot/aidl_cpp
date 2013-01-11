@@ -1,12 +1,13 @@
 package extra;
 import extra.IMemory;
-
+import import.status_t;
+import import.CString;
 
 interface IMediaMetadataRetriever {
     void disconnect();
-    void setDataSourceUrl( String srcUrl, in String * headers);
-    void setDataSourceFd(int fd, long offset, long length);
+    status_t setDataSourceUrl( in CString srcUrl, in CString/*KeyedVector*/ * headers);
+    status_t setDataSourceFd(int fd, long offset, long length);
     IMemory getFrameAtTime(long timeUs, int option);
     IMemory extractAlbumArt();
-    String  extractMetadata(int keyCode);
+    CString  extractMetadata(int keyCode);
 }
