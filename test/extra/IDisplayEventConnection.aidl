@@ -1,6 +1,8 @@
 package extra;
+import import/BitTube;
 
 interface IDisplayEventConnection {
-    int getDataChannel();
+    BitTube getDataChannel();
     void setVsyncRate(int count);
+    void requestNextVsync();
 }
