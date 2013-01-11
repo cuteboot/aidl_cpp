@@ -2,17 +2,17 @@ package extra;
 import import.GraphicBuffer;
 import import.QueueBufferInput;
 import import.QueueBufferOutput;
-
+import import.status_t;
 
 interface ISurfaceTexture {
-    void requestBuffer(int slot, out GraphicBuffer *  buf);
-    void setBufferCount(int bufferCount);
-    void dequeueBuffer(in int * slot, int w, int h, int format, int usage);
-    void queueBuffer(int slot, in QueueBufferInput input,
-        in QueueBufferOutput *  output);
-    void cancelBuffer(int slot);
-    int query(int what, in int *  value);
-    void setSynchronousMode(boolean enabled);
-    void connect(int api, in QueueBufferOutput *  output);
-    void disconnect(int api);
+    status_t requestBuffer(int slot, out GraphicBuffer *  buf);
+    status_t setBufferCount(int bufferCount);
+    status_t dequeueBuffer(out int * buf, int w, int h, int format, int usage);
+    status_t queueBuffer(int buf, in QueueBufferInput input,
+        out QueueBufferOutput *  output);
+    status_t cancelBuffer(int buf);
+    int query(int what, out int *  value);
+    status_t setSynchronousMode(boolean enabled);
+    status_t connect(int api, in QueueBufferOutput *  output);
+    status_t disconnect(int api);
 }

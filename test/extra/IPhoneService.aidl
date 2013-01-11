@@ -3,7 +3,7 @@ import extra.IPhoneClient;
 
 
 interface IPhoneService {
-    void Register(IPhoneClient client, int flags);
-    void Request(IPhoneClient client, int token, int message,
+    oneway void Register(IPhoneClient client, int flags);
+    oneway void Request(IPhoneClient client, int token, int message,
         int ivalue, String svalue);
 }

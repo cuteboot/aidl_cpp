@@ -39,7 +39,7 @@ interface IOMX {
         int range_length, int flags, long timestamp);
     status_t getExtensionIndex(in IntPtr node, in CString parameter_name,
         out int * index);
-    status_t onMessage(in omx_message msg);
+    void onMessage_bogus(); /* this is only in the IOMXObserver interface */
     status_t getGraphicBufferUsage(in IntPtr node, int port_index,
         out int * usage);
 }

@@ -4,6 +4,6 @@ import import.Sensor;
 
 
 interface ISensorServer {
-    Sensor * getSensorList();
+    Sensor[] getSensorList();
     ISensorEventConnection createSensorEventConnection();
 }
