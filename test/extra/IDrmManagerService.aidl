@@ -14,7 +14,7 @@ import extra.IDrmServiceListener;
 import import.status_t;
 import import.String8;
 import import.CString;
-
+import import.ssize_t;
 
 interface IDrmManagerService {
     int addUniqueId(boolean isNative);
@@ -62,5 +62,5 @@ interface IDrmManagerService {
     status_t finalizeDecryptUnit( int uniqueId,
         in DecryptHandle *  decryptHandle, int decryptUnitId);
     int pread(int uniqueId, in DecryptHandle * decryptHandle,
-        out void * buffer, int/*ssize_t*/ numBytes, long offset);
+        out void * buffer, in ssize_t numBytes, long offset);
 }

@@ -33,7 +33,8 @@ interface IMountService {
     void unmountObb(in String filename, boolean force,
         IObbActionListener token, int nonce);
     boolean isObbMounted(in String filename);
-    boolean getMountedObbPath(in String filename, String path);
+    boolean getMountedObbPath(in String filename, out String * path);
+    void isExternalStorageEmulated(); /* not defined */
     int decryptStorage(in String password);
     int encryptStorage(in String password);
 }
