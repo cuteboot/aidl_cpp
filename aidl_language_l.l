@@ -1,6 +1,6 @@
 %{
 #include "aidl_language.h"
-#include "aidl_language_y.h"
+#include "aidl_language_y.hpp"
 #include "search_path.h"
 #include <string.h>
 #include <stdlib.h>

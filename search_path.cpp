@@ -24,7 +24,7 @@ find_import_file(const char* given)
     for (int i=0; i<N; i++) {
         char c = expected[i];
         if (c == '.') {
-            expected[i] = OS_PATH_SEPARATOR;
+            expected[i] = '/';
         }
     }
     expected += ".aidl";
@@ -34,10 +34,10 @@ find_import_file(const char* given)
         string f = *it;
         if (f.size() == 0) {
             f = ".";
-            f += OS_PATH_SEPARATOR;
+            f += '/';
         }
-        else if (f[f.size()-1] != OS_PATH_SEPARATOR) {
-            f += OS_PATH_SEPARATOR;
+        else if (f[f.size()-1] != '/') {
+            f += '/';
         }
         f.append(expected);
 

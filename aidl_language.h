@@ -62,6 +62,11 @@ typedef struct method_type {
     buffer_type* comments_token; // points into this structure, DO NOT DELETE
 } method_type;
 
+enum language_t {
+	JAVA = 0,	
+	CPP = 1
+};
+
 enum {
     USER_DATA_TYPE = 12,
     INTERFACE_TYPE_BINDER,

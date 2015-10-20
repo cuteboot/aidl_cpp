@@ -174,16 +174,16 @@ check_filename(const char* filename, const char* package, buffer_type* name)
 
 #ifdef HAVE_WINDOWS_PATHS
     if (isalpha(filename[0]) && filename[1] == ':'
-        && filename[2] == OS_PATH_SEPARATOR) {
+        && filename[2] == '/') {
 #else
-    if (filename[0] == OS_PATH_SEPARATOR) {
+    if (filename[0] == '/') {
 #endif
         fn = filename;
     } else {
         fn = getcwd(cwd, sizeof(cwd));
         len = fn.length();
-        if (fn[len-1] != OS_PATH_SEPARATOR) {
-            fn += OS_PATH_SEPARATOR;
+        if (fn[len-1] != '/') {
+            fn += '/';
         }
         fn += filename;
     }
@@ -196,7 +196,7 @@ check_filename(const char* filename, const char* package, buffer_type* name)
     len = expected.length();
     for (size_t i=0; i<len; i++) {
         if (expected[i] == '.') {
-            expected[i] = OS_PATH_SEPARATOR;
+            expected[i] = '/';
         }
     }
 
@@ -213,12 +213,12 @@ check_filename(const char* filename, const char* package, buffer_type* name)
         p = fn.c_str() + (len - expected.length());
 
 #ifdef HAVE_WINDOWS_PATHS
-        if (OS_PATH_SEPARATOR != '/') {
+        if ('/' != '/') {
             // Input filename under cygwin most likely has / separators
             // whereas the expected string uses \\ separators. Adjust
             // them accordingly.
           for (char *c = const_cast<char *>(p); *c; ++c) {
-                if (*c == '/') *c = OS_PATH_SEPARATOR;
+                if (*c == '/') *c = '/';
             }
         }
 #endif
@@ -686,13 +686,13 @@ generate_outputFileName2(const Options& options, const buffer_type& name, const 
     // create the path to the destination folder based on the
     // interface package name
     result = options.outputBaseFolder;
-    result += OS_PATH_SEPARATOR;
+    result += '/';
 
     string packageStr = package;
     size_t len = packageStr.length();
     for (size_t i=0; i<len; i++) {
         if (packageStr[i] == '.') {
-            packageStr[i] = OS_PATH_SEPARATOR;
+            packageStr[i] = '/';
         }
     }
 
@@ -702,7 +702,7 @@ generate_outputFileName2(const Options& options, const buffer_type& name, const 
     const char* p = strchr(name.data, '.');
     len = p ? p-name.data : strlen(name.data);
 
-    result += OS_PATH_SEPARATOR;
+    result += '/';
     result.append(name.data, len);
     result += ".java";
 
@@ -735,7 +735,7 @@ static void
 check_outputFilePath(const string& path) {
     size_t len = path.length();
     for (size_t i=0; i<len ; i++) {
-        if (path[i] == OS_PATH_SEPARATOR) {
+        if (path[i] == '/') {
             string p = path.substr(0, i);
             if (access(path.data(), F_OK) != 0) {
 #ifdef HAVE_MS_C_RUNTIME
