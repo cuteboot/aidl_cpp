@@ -27,23 +27,23 @@ static const char *this_interface;
 static TYPEMAP* lookup_type(const char *name)
 {
 static TYPEMAP typemap[] = {
-    {"int", "int", "int", "%s = data.readInt32();\n", "data.writeInt32(%s);\n"},
-    {"long", "long", "long", "%s = data.readLong();\n", "data.writeLong(%s);\n"},
-    {"byte", "byte", "byte", "%s = data.readByte();\n", "data.writeByte(%s);\n"},
-    {"boolean", "bool", "bool", "%s = data.readInt32();\n", "data.writeInt32((int)%s);\n"},
-    {"String", "String16", "const String16&", "%s = data.readString16();\n", "data.writeString16(%s);\n"},
-    {"String8", "String8", "const String8&", "%s = data.readString8();\n", "data.writeString8(%s);\n"},
-    {"CString", "CString", "const CString&", "%s = data.readCString();\n", "data.writeCString(%s);\n"},
-    {"IBinder", "const sp<IBinder>&", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "data.writeStrongBinder(%s);\n"},
-    {"CharSequence", "string", "string", "%s = data.readstring();\n", "data.writestring(%s);\n"},
+    {"int", "int", "int", "%s = data.readInt32();\n", "_data.writeInt32(%s);\n"},
+    {"long", "long", "long", "%s = data.readInt64();\n", "_data.writeInt64(%s);\n"},
+    {"byte", "byte", "byte", "%s = data.readByte();\n", "_data.writeByte(%s);\n"},
+    {"boolean", "bool", "bool", "%s = data.readInt32();\n", "_data.writeInt32((int)%s);\n"},
+    {"String", "String16", "const String16&", "%s = data.readString16();\n", "_data.writeString16(%s);\n"},
+    {"String8", "String8", "const String8&", "%s = data.readString8();\n", "_data.writeString8(%s);\n"},
+    {"CString", "CString", "const CString&", "%s = data.readCString();\n", "_data.writeCString(%s);\n"},
+    {"IBinder", "sp<IBinder>", "const sp<IBinder>&", "%s = data.readStrongBinder();\n", "_data.writeStrongBinder(%s);\n"},
+    {"CharSequence", "string", "string", "%s = data.readstring();\n", "_data.writestring(%s);\n"},
     {"IBinderThreadPriorityService", "const sp<IBinderThreadPriorityService>&", "sp<IBinderThreadPriorityService>",
-        "%s = data.readIBinderThreadPriorityService();\n", "data.writeIBinderThreadPriorityService(%s);\n"},
-    {"WorkSource", "WorkSource", "WorkSource", "%s = data.readInt32();\n", "data.writeInt32(0);\n"},
-    {"float", "float", "float", "%s = data.readfloat();\n", "data.writefloat(%s);\n"},
+        "%s = data.readIBinderThreadPriorityService();\n", "_data.writeIBinderThreadPriorityService(%s);\n"},
+    {"WorkSource", "WorkSource", "WorkSource", "%s = data.readInt32();\n", "_data.writeInt32(0);\n"},
+    {"float", "float", "float", "%s = data.readFloat();\n", "_data.writeFloat(%s);\n"},
     {0, 0, 0, 0, 0}};
 
 static TYPEMAP pattern =
-    {"%s", "const sp<%s>&", "const sp<%s>&", "%%s = data.readStrong%s();\n", "%%s.writeToParcel(&data);\n"};
+    {"%s", "const sp<%s>&", "const sp<%s>&", "%%s = data.readStrong%s();\n", "%%s.writeToParcel(&_data);\n"};
 static char temps[5][100];
 static TYPEMAP temp = {(const char *)temps[0], (const char *)temps[1], (const char *)temps[2], (const char *)temps[3], (const char *)temps[4]};
 
@@ -108,7 +108,8 @@ static void generate_header_file(FILE *outputfd, interface_item_type* aitem)
     interface_item_type* item = aitem;
     fprintf(outputfd, "#ifndef ANDROID_%s_H\n#define ANDROID_%s_H\n\n", makeup(this_proxy_interface).c_str(), makeup(this_proxy_interface).c_str());
     //fprintf(outputfd, "#include <utils/Errors.h>\n");
-    fprintf(outputfd, "#include <binder/IInterface.h>\n\n");
+    fprintf(outputfd, "#include <binder/IInterface.h>\n");
+    fprintf(outputfd, "#include <utils/String8.h>\n\n");
     fprintf(outputfd, "namespace android {\n\n");
     fprintf(outputfd, "class %s : public IInterface\n{\npublic:\n", this_proxy_interface);
     fprintf(outputfd, "    DECLARE_META_INTERFACE(%s);\n", this_interface);
@@ -156,6 +157,7 @@ static void generate_header_file(FILE *outputfd, interface_item_type* aitem)
     }
     fprintf(outputfd, "    };\n");
     fprintf(outputfd, "    virtual status_t onTransact(uint32_t code, const Parcel& data,\n        Parcel *reply, uint32_t flags);\n");
+    fprintf(outputfd, "};\n");
     fprintf(outputfd, "}; // namespace android\n\n#endif // ANDROID_%s_H\n", makeup(this_proxy_interface).c_str());
 }
 
@@ -172,6 +174,7 @@ static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
     fprintf(outputfd, "namespace android {\n\n");
     fprintf(outputfd, "class Bp%s : public BpInterface<%s>\n{\n",
         this_interface, this_proxy_interface);
+    fprintf(outputfd, "    public:\n");
     fprintf(outputfd, "    Bp%s(const sp<IBinder>& impl)\n        : BpInterface<%s>(impl) { }\n",
         this_interface, this_proxy_interface);
     while (item) {
@@ -198,8 +201,8 @@ static void generate_implementation(FILE *outputfd, interface_item_type* aitem)
                 if (arg)
                     fprintf(outputfd, ", ");
             }
-            fprintf(outputfd, ")\n{\n    Parcel data, reply;\n");
-            fprintf(outputfd, "    data.writeInterfaceToken(%s::getInterfaceDescriptor());\n", this_proxy_interface);
+            fprintf(outputfd, ")\n{\n    Parcel _data, reply;\n");
+            fprintf(outputfd, "   _data.writeInterfaceToken(%s::getInterfaceDescriptor());\n", this_proxy_interface);
             arg = method->args;
             while (arg) {
                 int dir = convert_direction(arg->direction.data);
@@ -216,7 +219,7 @@ printf("[%s:%d] out + dim not supported\n", __FUNCTION__, __LINE__);
             fprintf(outputfd, "    ");
             if (return_void)
                 fprintf(outputfd, "return ");
-            fprintf(outputfd, "remote()->transact(%s, data, &reply)", transactCodeName.c_str());
+            fprintf(outputfd, "remote()->transact(%s, _data, &reply)", transactCodeName.c_str());
             if (!return_void) {
                 fprintf(outputfd, ";\n    // fail on exception\n    if (reply.readExceptionCode() != 0) return 0;\n    return reply.readInt32()");
             }
